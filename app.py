@@ -171,8 +171,8 @@ with st.sidebar.expander("\U0001f4c2 Update Data EDOM", expanded=False):
 st.sidebar.markdown("---")
 st.sidebar.markdown(
     """
-    <div style='font-size:12px; color:gray; line-height:1.6;'>
-        \U0001f4bb <b>Developer</b><br>
+    <div style='font-size:14px; color:gray; line-height:1.6;'>
+        \U0001f4bb <b>Developer</b>:
         Ikhsan Fillah Hidayat
     </div>
     """,

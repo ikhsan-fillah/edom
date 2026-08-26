@@ -1,6 +1,8 @@
 """EDOM Dashboard - Streamlit app for lecturer evaluation report visualization."""
 
 import io
+import tempfile
+from pathlib import Path
 
 import streamlit as st
 
@@ -13,6 +15,7 @@ from src.data_loader import (
     get_kriteria_list,
     load_and_prepare_data,
 )
+from src.data_manager import replace_edom_data, validate_edom_file
 from src.utils import DATA_PATH, safe_filename
 
 
@@ -47,7 +50,6 @@ def get_cached_figure(cache_key: str, builder):
     """Return a figure from session memory or build it once."""
     if cache_key not in st.session_state:
         st.session_state[cache_key] = builder()
-
     return st.session_state[cache_key]
 
 
@@ -65,7 +67,7 @@ def show_png_download(fig, cache_key: str, filename: str):
 
     if png_key in st.session_state:
         st.download_button(
-            label="⬇ Download PNG",
+            label="\u2b07 Download PNG",
             data=st.session_state[png_key],
             file_name=filename,
             mime="image/png",
@@ -96,6 +98,65 @@ selected_dosen = st.sidebar.selectbox(
 st.sidebar.markdown(f"**Total Dosen:** {len(dosen_list)}")
 st.sidebar.markdown(f"**Total Responden:** {len(df)}")
 
+# -------------------------------------------------------------------
+# Sidebar: Update Data EDOM
+# -------------------------------------------------------------------
+with st.sidebar.expander("\U0001f4c2 Update Data EDOM", expanded=False):
+    st.caption(
+        "Upload file CSV EDOM baru. "
+        "Data sebelumnya akan dibuatkan backup otomatis."
+    )
+
+    uploaded_file = st.file_uploader(
+        "Pilih file CSV",
+        type=["csv"],
+        key="upload_edom_csv",
+    )
+
+    if uploaded_file is not None:
+        with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=".csv",
+        ) as temp_file:
+            temp_file.write(uploaded_file.getvalue())
+            temporary_path = Path(temp_file.name)
+
+        valid, message = validate_edom_file(temporary_path)
+        temporary_path.unlink(missing_ok=True)
+
+        if valid:
+            st.success(message)
+
+            if st.button(
+                "Gunakan Data Baru",
+                type="primary",
+                key="replace_edom_data",
+            ):
+                replace_edom_data(uploaded_file.getvalue())
+
+                load_data.clear()
+                st.cache_data.clear()
+
+                keys_to_remove = [
+                    key
+                    for key in st.session_state
+                    if key.startswith("fig_")
+                    or key.startswith("kriteria_index_")
+                ]
+                for key in keys_to_remove:
+                    del st.session_state[key]
+
+                st.success(
+                    "Data berhasil diperbarui. "
+                    "Dashboard sedang dimuat ulang."
+                )
+                st.rerun()
+        else:
+            st.error(message)
+
+# -------------------------------------------------------------------
+# Guard: pilih dosen dulu
+# -------------------------------------------------------------------
 if selected_dosen == "-- Pilih Dosen --":
     st.info("Silakan pilih dosen dari sidebar untuk menampilkan data.")
     st.stop()
@@ -194,7 +255,7 @@ with st.expander("Bar Chart - Skor per Kriteria"):
     nav_prev, nav_info, nav_next = st.columns([1, 3, 1])
 
     with nav_prev:
-        if st.button("⬅ Prev", key=f"prev_{safe_dosen}"):
+        if st.button("\u2b05 Prev", key=f"prev_{safe_dosen}"):
             st.session_state[nav_key] = (
                 st.session_state[nav_key] - 1
             ) % total_kriteria
@@ -212,7 +273,7 @@ with st.expander("Bar Chart - Skor per Kriteria"):
         )
 
     with nav_next:
-        if st.button("Next ➡", key=f"next_{safe_dosen}"):
+        if st.button("Next \u27a1", key=f"next_{safe_dosen}"):
             st.session_state[nav_key] = (
                 st.session_state[nav_key] + 1
             ) % total_kriteria

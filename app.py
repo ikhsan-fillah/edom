@@ -24,6 +24,17 @@ st.set_page_config(
     layout="wide",
 )
 
+# Prevent browser from jumping to top on fragment rerun
+st.markdown(
+    """
+    <style>
+    html { scroll-behavior: auto !important; }
+    [data-testid="stMain"] { overflow-anchor: auto; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("Dashboard Rekap EDOM (Evaluasi Dosen oleh Mahasiswa)")
 
 
@@ -242,12 +253,12 @@ with st.expander("Radar Chart - Rata-rata Skor per Periode"):
             )
 
 # -------------------------------------------------------------------
-# Bar chart: @st.fragment isolates rerun to this section only,
-# preventing the page from scrolling back to top on Prev/Next click.
+# Bar chart: @st.fragment + scroll-anchor CSS keeps page position
+# stable when Prev/Next is clicked.
 # -------------------------------------------------------------------
 @st.fragment
 def bar_chart_section(df_dosen, kriteria_list, nama_dosen, safe_dosen):
-    """Render bar chart navigator inside a fragment to avoid full-page rerun."""
+    """Render bar chart navigator without triggering full-page rerun."""
     nav_key = f"kriteria_index_{safe_dosen}"
 
     if nav_key not in st.session_state:
@@ -255,32 +266,22 @@ def bar_chart_section(df_dosen, kriteria_list, nama_dosen, safe_dosen):
 
     total_kriteria = len(kriteria_list)
 
-    # Tombol Prev dan Next sejajar di kiri, label di sebelah kanannya
-    nav_prev, nav_next, nav_label = st.columns([1, 1, 4])
+    # Rapat: dua tombol side-by-side dengan kolom sempit, sisanya kosong
+    btn_prev, btn_next, _spacer = st.columns([1, 1, 8])
 
-    with nav_prev:
+    with btn_prev:
         if st.button("\u2b05 Prev", key=f"prev_{safe_dosen}"):
             st.session_state[nav_key] = (
                 st.session_state[nav_key] - 1
             ) % total_kriteria
+            st.rerun(scope="fragment")
 
-    with nav_next:
+    with btn_next:
         if st.button("Next \u27a1", key=f"next_{safe_dosen}"):
             st.session_state[nav_key] = (
                 st.session_state[nav_key] + 1
             ) % total_kriteria
-
-    # Label dibaca setelah kedua tombol selesai diproses
-    with nav_label:
-        nomor_kriteria = st.session_state[nav_key] + 1
-        st.markdown(
-            (
-                "<p style='font-weight:600; padding-top:8px;'>"
-                f"Kriteria {nomor_kriteria} / {total_kriteria}"
-                "</p>"
-            ),
-            unsafe_allow_html=True,
-        )
+            st.rerun(scope="fragment")
 
     current_index = st.session_state[nav_key]
     current_kriteria = kriteria_list[current_index]

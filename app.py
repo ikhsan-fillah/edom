@@ -242,9 +242,12 @@ with st.expander("Radar Chart - Rata-rata Skor per Periode"):
             )
 
 # -------------------------------------------------------------------
-# Bar chart: one kriteria at a time, figure stored in Session State.
+# Bar chart: @st.fragment isolates rerun to this section only,
+# preventing the page from scrolling back to top on Prev/Next click.
 # -------------------------------------------------------------------
-with st.expander("Bar Chart - Skor per Kriteria"):
+@st.fragment
+def bar_chart_section(df_dosen, kriteria_list, nama_dosen, safe_dosen):
+    """Render bar chart navigator inside a fragment to avoid full-page rerun."""
     nav_key = f"kriteria_index_{safe_dosen}"
 
     if nav_key not in st.session_state:
@@ -252,8 +255,8 @@ with st.expander("Bar Chart - Skor per Kriteria"):
 
     total_kriteria = len(kriteria_list)
 
-    # Proses tombol Prev dan Next terlebih dahulu di dalam kolom
-    nav_prev, nav_next = st.columns([1, 1])
+    # Tombol Prev dan Next sejajar di kiri, label di sebelah kanannya
+    nav_prev, nav_next, nav_label = st.columns([1, 1, 4])
 
     with nav_prev:
         if st.button("\u2b05 Prev", key=f"prev_{safe_dosen}"):
@@ -267,17 +270,17 @@ with st.expander("Bar Chart - Skor per Kriteria"):
                 st.session_state[nav_key] + 1
             ) % total_kriteria
 
-    # Label dibaca SETELAH kedua tombol selesai diproses — tidak lag lagi
-    nomor_kriteria = st.session_state[nav_key] + 1
-    st.markdown(
-        (
-            "<p style='text-align:center; font-weight:600; "
-            "padding-top:4px; padding-bottom:4px;'>"
-            f"Kriteria {nomor_kriteria} / {total_kriteria}"
-            "</p>"
-        ),
-        unsafe_allow_html=True,
-    )
+    # Label dibaca setelah kedua tombol selesai diproses
+    with nav_label:
+        nomor_kriteria = st.session_state[nav_key] + 1
+        st.markdown(
+            (
+                "<p style='font-weight:600; padding-top:8px;'>"
+                f"Kriteria {nomor_kriteria} / {total_kriteria}"
+                "</p>"
+            ),
+            unsafe_allow_html=True,
+        )
 
     current_index = st.session_state[nav_key]
     current_kriteria = kriteria_list[current_index]
@@ -307,3 +310,7 @@ with st.expander("Bar Chart - Skor per Kriteria"):
         bar_cache_key,
         f"kriteria_{current_index + 1:02d}_{safe_dosen}.png",
     )
+
+
+with st.expander("Bar Chart - Skor per Kriteria"):
+    bar_chart_section(df_dosen, kriteria_list, nama_dosen, safe_dosen)

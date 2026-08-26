@@ -2,21 +2,22 @@
 
 import plotly.graph_objects as go
 
-from src.utils import get_output_dir
-
 
 def _average_scores(df_periode, kriteria_list):
-    """Return average score per kriteria for a given periode subset."""
+    """Return mean score for every kriteria in one period."""
     return [df_periode[col].mean() for col in kriteria_list]
 
 
-def generate_radar_chart(df_dosen, kriteria_list, periode: str, nama_dosen: str, save: bool = True):
-    """Generate a radar chart of average scores for a single Periode ('Pra UTS' or 'Pra UAS')."""
+def generate_radar_chart(df_dosen, kriteria_list, periode: str, nama_dosen: str):
+    """Build a radar chart for one lecturer and one period."""
     df_periode = df_dosen[df_dosen["Periode"] == periode]
     avg_scores = _average_scores(df_periode, kriteria_list)
 
-    categories = kriteria_list + [kriteria_list[0]]
-    values = avg_scores + [avg_scores[0]]
+    categories = list(kriteria_list)
+    categories.append(kriteria_list[0])
+
+    values = list(avg_scores)
+    values.append(avg_scores[0])
 
     fig = go.Figure(
         data=[
@@ -25,31 +26,21 @@ def generate_radar_chart(df_dosen, kriteria_list, periode: str, nama_dosen: str,
                 theta=categories,
                 fill="toself",
                 name=periode,
-                line=dict(color="#8E44AD"),
+                line={"color": "#8E44AD"},
             )
         ]
     )
+
     fig.update_layout(
         title=f"{nama_dosen} — Rata-rata Skor ({periode})",
-        polar=dict(radialaxis=dict(visible=True, range=[0, 8])),
+        polar={
+            "radialaxis": {
+                "visible": True,
+                "range": [0, 8],
+            }
+        },
         template="plotly_white",
         showlegend=False,
     )
 
-    if save:
-        out_dir = get_output_dir(nama_dosen)
-        safe_periode = periode.replace(" ", "_")
-        out_path = out_dir / f"radar_{safe_periode}.png"
-        fig.write_image(str(out_path))
-        return out_path
-
     return fig
-
-
-def generate_all_radar_charts(df_dosen, kriteria_list, nama_dosen: str):
-    """Generate radar charts for both Pra UTS and Pra UAS periods."""
-    paths = []
-    for periode in ["Pra UTS", "Pra UAS"]:
-        path = generate_radar_chart(df_dosen, kriteria_list, periode, nama_dosen, save=True)
-        paths.append(path)
-    return paths

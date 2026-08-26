@@ -22,10 +22,10 @@ Mengotomatiskan proses rekap dan visualisasi hasil EDOM sehingga setiap dosen me
 
 Periode dibedakan berdasarkan rentang tanggal pada kolom `Timestamp` (bukan kolom eksplisit):
 
-| Periode   | Rentang Tanggal                          |
-|-----------|-------------------------------------------|
-| Pra UTS   | 08/01/2026 05.29 - 27/04/2026 13.56       |
-| Pra UAS   | 08/06/2026 08.14 - 26/06/2026 14.46       |
+| Periode | Rentang Tanggal                     |
+| ------- | ----------------------------------- |
+| Pra UTS | 08/01/2026 05.29 - 27/04/2026 13.56 |
+| Pra UAS | 08/06/2026 08.14 - 26/06/2026 14.46 |
 
 Seluruh data sudah divalidasi masuk rapi ke salah satu rentang, tidak ada data yang berada di luar rentang tersebut.
 
@@ -63,7 +63,43 @@ Dibangun dengan Streamlit menggunakan expander/tab per dosen, mendukung scroll h
 
 ## Instalasi
 
+### 1. Siapkan lingkungan Python
+
+Pastikan Python 3.10+ sudah terpasang. Jika ingin, buat virtual environment terlebih dahulu:
+
+```bash
+python -m venv .venv
+```
+
+Aktifkan environment tersebut sebelum melanjutkan instalasi paket.
+
+### 2. Install dependensi
+
 ```bash
 pip install -r requirements.txt
+```
+
+### 3. Jalankan aplikasi
+
+Perintah yang benar untuk membuka dashboard Streamlit adalah:
+
+```bash
 streamlit run app.py
 ```
+
+Jika perintah `streamlit` belum dikenali, pastikan environment Python yang dipakai sudah aktif dan instalasi `requirements.txt` berhasil.
+
+## Cara Penggunaan dari Awal
+
+1. Pastikan file data CSV tersedia di folder `data/` dengan nama `EDOM GENAP 25 26(Sheet1).csv`.
+2. Buka terminal di folder project `d:\edom`.
+3. Buat virtual environment jika diperlukan dengan `python -m venv .venv`.
+4. Aktifkan virtual environment.
+5. Jalankan `pip install -r requirements.txt`.
+6. Jalankan `streamlit run app.py`.
+7. Browser akan terbuka otomatis. Jika tidak, buka URL lokal yang ditampilkan Streamlit, biasanya `http://localhost:8501`.
+
+## Catatan
+
+- Jangan menjalankan `python -m streamlit app.py` karena format tersebut salah. Streamlit membutuhkan subcommand `run`.
+- Jika data tidak muncul, cek kembali nama file CSV dan lokasi file di folder `data/`.

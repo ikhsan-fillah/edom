@@ -166,6 +166,20 @@ with st.sidebar.expander("\U0001f4c2 Update Data EDOM", expanded=False):
             st.error(message)
 
 # -------------------------------------------------------------------
+# Sidebar: Developer credit
+# -------------------------------------------------------------------
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    """
+    <div style='font-size:12px; color:gray; line-height:1.6;'>
+        \U0001f4bb <b>Developer</b><br>
+        Ikhsan Fillah Hidayat
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# -------------------------------------------------------------------
 # Guard: pilih dosen dulu
 # -------------------------------------------------------------------
 if selected_dosen == "-- Pilih Dosen --":

@@ -252,7 +252,8 @@ with st.expander("Bar Chart - Skor per Kriteria"):
 
     total_kriteria = len(kriteria_list)
 
-    nav_prev, nav_info, nav_next = st.columns([1, 3, 1])
+    # Proses tombol Prev dan Next terlebih dahulu di dalam kolom
+    nav_prev, nav_next = st.columns([1, 1])
 
     with nav_prev:
         if st.button("\u2b05 Prev", key=f"prev_{safe_dosen}"):
@@ -260,23 +261,23 @@ with st.expander("Bar Chart - Skor per Kriteria"):
                 st.session_state[nav_key] - 1
             ) % total_kriteria
 
-    with nav_info:
-        nomor_kriteria = st.session_state[nav_key] + 1
-        st.markdown(
-            (
-                "<p style='text-align:center; font-weight:600; "
-                "padding-top:8px;'>"
-                f"Kriteria {nomor_kriteria} / {total_kriteria}"
-                "</p>"
-            ),
-            unsafe_allow_html=True,
-        )
-
     with nav_next:
         if st.button("Next \u27a1", key=f"next_{safe_dosen}"):
             st.session_state[nav_key] = (
                 st.session_state[nav_key] + 1
             ) % total_kriteria
+
+    # Label dibaca SETELAH kedua tombol selesai diproses — tidak lag lagi
+    nomor_kriteria = st.session_state[nav_key] + 1
+    st.markdown(
+        (
+            "<p style='text-align:center; font-weight:600; "
+            "padding-top:4px; padding-bottom:4px;'>"
+            f"Kriteria {nomor_kriteria} / {total_kriteria}"
+            "</p>"
+        ),
+        unsafe_allow_html=True,
+    )
 
     current_index = st.session_state[nav_key]
     current_kriteria = kriteria_list[current_index]
